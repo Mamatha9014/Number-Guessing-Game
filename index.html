@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Guessing Game</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    overflow: hidden;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    padding: 30px 20px;
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 2;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.submit-btn { background: #00c9a7; color: white; }
+.reset-btn { background: #ff7675; color: white; }
+
+#message {
+    margin-top: 15px;
+    font-weight: bold;
+    min-height: 24px;
+    font-size: 18px;
+}
+
+.score-board {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.win-animation {
+    animation: bounce 0.6s infinite alternate;
+    color: #00ffcc;
+    text-shadow: 0 0 15px #00ffcc;
+}
+
+@keyframes bounce {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+}
+
+.confetti {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    top: -10px;
+    animation: fall linear forwards;
+    z-index: 1;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="game-container">
+    <h2>🎯 Guess The Number</h2>
+    <p>Guess between 1 and 100</p>
+
+    <input type="number" id="guessInput" placeholder="Enter your guess">
+
+    <div class="buttons">
+        <button class="submit-btn" onclick="checkGuess()">Submit</button>
+        <button class="reset-btn" onclick="resetGame()">Reset</button>
+    </div>
+
+    <p id="message"></p>
+
+    <div class="score-board">
+        <p>Score: <span id="score">100</span></p>
+        <p>High Score: <span id="highScore">0</span></p>
+    </div>
+</div>
+
+<script>
+let randomNumber = Math.floor(Math.random() * 100) + 1;
+let score = 100;
+let highScore = localStorage.getItem("highScore") || 0;
+
+document.getElementById("highScore").innerText = highScore;
+
+function checkGuess() {
+    let userGuess = Number(document.getElementById("guessInput").value);
+    let message = document.getElementById("message");
+
+    if (!userGuess) {
+        message.innerText = "⚠️ Enter a valid number!";
+        return;
+    }
+
+    if (userGuess === randomNumber) {
+        message.innerText = "🎉 YOU WON!!!";
+        message.classList.add("win-animation");
+        createConfetti();
+
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem("highScore", highScore);
+            document.getElementById("highScore").innerText = highScore;
+        }
+
+        setTimeout(() => {
+            message.classList.remove("win-animation");
+        }, 3000);
+
+    } else {
+        score -= 10;
+        document.getElementById("score").innerText = score;
+
+        if (score <= 0) {
+            message.innerText = "💀 Game Over!";
+            score = 0;
+            return;
+        }
+
+        if (userGuess > randomNumber) {
+            message.innerText = "📈 Too High!";
+        } else {
+            message.innerText = "📉 Too Low!";
+        }
+    }
+}
+
+function resetGame() {
+    randomNumber = Math.floor(Math.random() * 100) + 1;
+    score = 100;
+    document.getElementById("score").innerText = score;
+    document.getElementById("message").innerText = "";
+    document.getElementById("guessInput").value = "";
+}
+
+function createConfetti() {
+    for (let i = 0; i < 80; i++) {
+        let confetti = document.createElement("div");
+        confetti.classList.add("confetti");
+
+        confetti.style.left = Math.random() * window.innerWidth + "px";
+        confetti.style.backgroundColor =
+            ["#ff7675","#74b9ff","#55efc4","#ffeaa7","#a29bfe"][Math.floor(Math.random()*5)];
+        confetti.style.animationDuration = (Math.random() * 3 + 2) + "s";
+
+        document.body.appendChild(confetti);
+
+        setTimeout(() => {
+            confetti.remove();
+        }, 5000);
+    }
+}
+</script>
+
+</body>
+</html>
